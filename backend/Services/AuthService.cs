@@ -1,31 +1,35 @@
+using backend.Data;
 using backend.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Microsoft.IdentityModel.Tokens;
 
 namespace backend.Services
 {
     public class AuthService
     {
+        private readonly AppDbContext _context;
+        private readonly IConfiguration _config;
+
+        public AuthService(AppDbContext context, IConfiguration config)
+        {
+            _context = context;
+            _config = config;
+        }
+
         public User ValidateUser(string email, string password)
         {
-            if (email == "admin@test.com" && password == "1234")
-            {
-                return new User
-                {
-                    Id = 1,
-                    Email = email,
-                    Password = password
-                };
-            }
-
-            return null;
+            return _context.Users
+                .FirstOrDefault(u => u.Email == email && u.Password == password);
         }
 
         public string GenerateJwtToken(User user)
         {
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("THIS_IS_SUPER_SECRET_KEY_FOR_TASK_TRACKER_123"));
+            var key = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(_config["Jwt:Key"])
+            );
 
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
@@ -36,8 +40,8 @@ namespace backend.Services
             };
 
             var token = new JwtSecurityToken(
-                issuer: "TaskTracker",
-                audience: "TaskTrackerUsers",
+                issuer: _config["Jwt:Issuer"],
+                audience: _config["Jwt:Audience"],
                 claims: claims,
                 expires: DateTime.Now.AddHours(1),
                 signingCredentials: creds

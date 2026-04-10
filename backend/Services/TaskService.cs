@@ -1,4 +1,3 @@
-using backend.Data;
 using backend.Models;
 using backend.DTOs;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +15,7 @@ namespace backend.Services
 
         public async Task<List<TaskItem>> GetTasksByUserId(int userId)
         {
-            return await _context.Tasks.Where(t => t.UserId == userId).ToListAsync();
+            return await _context.TaskItems.Where(t => t.UserId == userId).ToListAsync();
         }
 
         public async Task<TaskItem> CreateTask(TaskCreateDto taskDto, int userId)
@@ -29,14 +28,14 @@ namespace backend.Services
                 UserId = userId
             };
 
-            _context.Tasks.Add(task);
+            _context.TaskItems.Add(task);
             await _context.SaveChangesAsync();
             return task;
         }
 
         public async Task<bool> UpdateTask(TaskUpdateDto taskDto)
         {
-            var task = await _context.Tasks.FindAsync(taskDto.Id);
+            var task = await _context.TaskItems.FindAsync(taskDto.Id);
             if (task == null) return false;
 
             task.Title = taskDto.Title;
@@ -49,10 +48,10 @@ namespace backend.Services
 
         public async Task<bool> DeleteTask(int id)
         {
-            var task = await _context.Tasks.FindAsync(id);
+            var task = await _context.TaskItems.FindAsync(id);
             if (task == null) return false;
 
-            _context.Tasks.Remove(task);
+            _context.TaskItems.Remove(task);
             await _context.SaveChangesAsync();
             return true;
         }

@@ -10,9 +10,9 @@ namespace backend.Controllers
     {
         private readonly AuthService _authService;
 
-        public AuthController()
+        public AuthController(AuthService authService)
         {
-            _authService = new AuthService();
+            _authService = authService;
         }
 
         [HttpPost("login")]
